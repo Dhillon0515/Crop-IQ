@@ -1,78 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, TrendingDown, MapPin, Loader2 } from 'lucide-react';
+import { MapPin, TrendingUp, Loader2 } from 'lucide-react';
 
-const MandiPriceCarousel = () => {
-  // 1. Set up state to hold our real data and a loading spinner
+const MandiPriceCarousel = ({ lang, t }) => {
   const [prices, setPrices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 2. Fetch the data from our Node.js backend when the component loads
   useEffect(() => {
-    const fetchRealPrices = async () => {
+    const fetchPrices = async () => {
       try {
-        // Calling your local backend server
         const response = await fetch('http://localhost:5000/api/prices');
         const data = await response.json();
-        
-        // Save the real data to state
         setPrices(data);
         setIsLoading(false);
       } catch (error) {
-        console.error("Failed to fetch live prices:", error);
+        console.error("Fetch error:", error);
         setIsLoading(false);
       }
     };
+    fetchPrices();
+  }, []);
 
-    fetchRealPrices();
-  }, []); // The empty array means this only runs once when the page loads
-
-  // Helper function to pick the right emoji based on the real crop name
-  const getCropEmoji = (cropName) => {
+  const translateCrop = (cropName) => {
+    if (!cropName || !t?.crops) return cropName || "";
     const name = cropName.toLowerCase();
-    if (name.includes('wheat')) return '🌾';
-    if (name.includes('paddy') || name.includes('rice')) return '🍚';
-    if (name.includes('mustard')) return '🌼';
-    if (name.includes('maize')) return '🌽';
-    if (name.includes('cotton')) return '☁️';
-    if (name.includes('potato')) return '🥔';
-    return '🌱'; // Default emoji
+    
+    if (name.includes('wheat') || name.includes('kanak')) return t.crops.wheat || "Wheat";
+    if (name.includes('paddy') || name.includes('rice') || name.includes('jhona')) return t.crops.paddy || "Paddy";
+    if (name.includes('cotton') || name.includes('narma')) return t.crops.cotton || "Cotton";
+    if (name.includes('maize') || name.includes('makki')) return t.crops.maize || "Maize";
+    if (name.includes('mustard') || name.includes('sarson')) return t.crops.mustard || "Mustard";
+    
+    return cropName;
   };
 
   return (
-    <div className="mt-4 pl-4 md:px-10 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center pr-4 md:pr-0 mb-4">
-        <h3 className="text-lg md:text-2xl font-bold text-gray-800">Live Punjab Mandi Rates</h3>
-        <span className="text-xs md:text-sm text-green-600 font-bold cursor-pointer hover:bg-green-50 px-3 py-1 rounded-full transition-colors">See All</span>
+    <div className="mt-4 px-8 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-black text-gray-800 tracking-tight">{t?.mandiTitle}</h3>
+        <span className="text-sm text-green-600 font-bold cursor-pointer hover:underline">{t?.seeAll}</span>
       </div>
       
-      {/* Show a loading spinner while waiting for the government API */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="animate-spin text-green-600" size={32} />
-          <span className="ml-3 text-gray-500 font-medium">Fetching live rates from Agmarknet...</span>
+        <div className="flex items-center justify-center py-20 text-green-600 font-bold">
+          <Loader2 className="animate-spin mr-2"/> {t?.loading}
         </div>
-      ) : prices.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">No prices available right now.</div>
       ) : (
-        <div className="flex overflow-x-auto md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 pb-4 pr-4 md:pr-0 scrollbar-hide">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {prices.map((item) => (
-            <div key={item.id} className="min-w-[160px] md:min-w-0 bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex-shrink-0 hover:shadow-md hover:border-green-200 transition-all cursor-pointer">
-              <div className="flex justify-between items-start mb-3">
-                <div className="w-10 h-10 md:w-12 md:h-12 bg-orange-50 rounded-full flex items-center justify-center text-xl md:text-2xl shadow-sm">
-                  {getCropEmoji(item.crop)}
+            <div key={item.id} className="bg-white p-5 rounded-3xl shadow-sm border-l-4 border-green-500 hover:shadow-xl transition-all transform hover:-translate-y-1">
+              <div className="flex justify-between items-start">
+                <h4 className="font-bold text-gray-900 text-lg uppercase tracking-tight">{translateCrop(item.crop)}</h4>
+                <div className="bg-green-100 p-1 rounded-full"><TrendingUp size={14} className="text-green-600" /></div>
+              </div>
+              <div className="flex items-center text-xs text-gray-400 mt-1 font-medium">
+                <MapPin size={12} className="mr-1 text-orange-400" /> {item.market}
+              </div>
+              <div className="mt-4 flex items-end justify-between">
+                <div className="flex flex-col">
+                  <span className="text-2xl font-black text-gray-900">{item.price}</span>
+                  <span className="text-[10px] text-gray-400 font-bold">Per Quintal</span>
                 </div>
-                {item.trend === 'up' ? <TrendingUp size={20} className="text-green-500" /> : <TrendingDown size={20} className="text-red-500" />}
-              </div>
-              
-              <h4 className="font-bold text-gray-800 text-sm md:text-lg mt-2 capitalize">{item.crop.toLowerCase()}</h4>
-              <div className="flex items-center text-[10px] md:text-sm text-gray-500 mt-1 mb-3 font-medium">
-                <MapPin size={12} className="mr-1" />
-                <span className="truncate">{item.market}</span>
-              </div>
-              
-              <div className="flex items-end justify-between mt-auto">
-                <span className="font-black text-gray-900 md:text-xl">{item.price}</span>
-                <span className={`text-[10px] md:text-xs font-bold px-2 py-1 rounded-md ${item.trend === 'up' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>{item.change}</span>
+                <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-md uppercase">Live</span>
               </div>
             </div>
           ))}
