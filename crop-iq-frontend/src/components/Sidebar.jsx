@@ -1,45 +1,51 @@
 import React from 'react';
-import { Home, Cloud, BarChart3, User, Sprout, ShieldAlert } from 'lucide-react';
+import { Home, Leaf } from 'lucide-react';
 
-const Sidebar = ({ lang, t, activePage, setActivePage }) => {
-  const menuItems = [
-    { id: 'home', icon: <Home size={20} />, label: t.sidebar?.home || "Home" },
-    { id: 'weather', icon: <Cloud size={20} />, label: t.sidebar?.weather || "Weather" },
-    { id: 'mandi', icon: <BarChart3 size={20} />, label: t.sidebar?.mandi || "Mandi" },
-    { id: 'doctor', icon: <ShieldAlert size={20} />, label: t.sidebar?.doctor || "Plant Doctor" },
-    { id: 'profile', icon: <User size={20} />, label: t.sidebar?.profile || "Profile" },
+const Sidebar = ({ lang, activePage, setActivePage }) => {
+  // Cleaned up navigation items (Removed Weather & Mandi)
+  const navItems = [
+    { id: 'home', icon: Home, labelEn: 'Dashboard', labelPa: 'ਡੈਸ਼ਬੋਰਡ' },
+    { id: 'doctor', icon: Leaf, labelEn: 'Plant Doctor', labelPa: 'ਫ਼ਸਲ ਡਾਕਟਰ' },
   ];
 
   return (
-    <div className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col fixed left-0 top-0 z-40 shadow-sm">
-      <div className="p-6 flex items-center gap-3">
-        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center text-white font-black">
-          <Sprout size={18} />
-        </div>
-        <h1 className="text-xl font-black text-gray-900 tracking-tight">Crop IQ</h1>
+    <aside className="w-64 bg-white shadow-2xl h-screen fixed top-0 left-0 border-r border-green-50 flex flex-col z-40">
+      
+      {/* Project Logo/Branding */}
+      <div className="p-8">
+        <h1 className="text-3xl font-black text-green-700 tracking-tighter">
+          Crop IQ <span className="text-green-400">.</span>
+        </h1>
+        <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">
+          GNDEC Project
+        </p>
       </div>
 
-      <nav className="flex-1 px-4 mt-4 space-y-2">
-        {menuItems.map((item) => (
-          <div 
-            key={item.id}
-            onClick={() => setActivePage(item.id)}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all font-bold text-sm ${
-              activePage === item.id 
-              ? 'bg-green-50 text-green-700 shadow-sm border border-green-100' 
-              : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
-            }`}
-          >
-            {item.icon}
-            {item.label}
-          </div>
-        ))}
+      {/* Navigation Links */}
+      <nav className="flex-1 px-4 mt-4 space-y-3">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activePage === item.id;
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActivePage(item.id)}
+              className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black transition-all duration-300 ${
+                isActive 
+                  ? 'bg-green-600 text-white shadow-xl shadow-green-100 translate-x-1' 
+                  : 'text-gray-400 hover:bg-green-50 hover:text-green-700'
+              }`}
+            >
+              <Icon size={22} className={isActive ? 'animate-bounce' : ''} />
+              <span className="text-lg">
+                {lang === 'en' ? item.labelEn : item.labelPa}
+              </span>
+            </button>
+          );
+        })}
       </nav>
-
-      <div className="p-6 text-[10px] font-black text-gray-300 uppercase tracking-widest text-center">
-        GNDEC Ludhiana
-      </div>
-    </div>
+    </aside>
   );
 };
 

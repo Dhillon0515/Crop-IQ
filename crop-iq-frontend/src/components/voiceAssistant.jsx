@@ -1,29 +1,38 @@
 import React from 'react';
-import { Mic, Square } from 'lucide-react';
-import { useAgroVoice } from '../hooks/useAgroVoice';
+import { Mic, MicOff } from 'lucide-react';
 
-const VoiceAssistant = ({ lang, t }) => {
-  const { isListening, aiResponse, startListening, stopListening } = useAgroVoice(lang, t);
-
+// Notice we are ONLY using props here. 
+// Do NOT import or call useAgroVoice inside this file!
+const VoiceAssistant = ({ lang, t, isListening, aiResponse, startListening, stopListening }) => {
+  
   return (
-    <div className="fixed bottom-8 right-8 flex flex-col items-end z-50">
+    <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-4">
+      
+      {/* Tooltip / AI Response Bubble */}
       {aiResponse && (
-        <div className="mb-4 mr-2 max-w-xs bg-white p-4 rounded-2xl shadow-2xl border border-green-50 text-sm font-bold text-gray-800 animate-in fade-in slide-in-from-bottom-4">
-          <span className="text-green-600 mr-2">●</span> {aiResponse}
+        <div className="bg-white p-4 rounded-2xl shadow-2xl border border-green-100 mb-2 max-w-sm animate-in fade-in slide-in-from-bottom-4">
+          <p className="text-gray-800 font-bold text-sm">
+            <span className="text-green-600 mr-2">●</span>
+            {aiResponse}
+          </p>
         </div>
       )}
-      
-      <button 
+
+      {/* The Floating Mic Button */}
+      <button
         onClick={isListening ? stopListening : startListening}
-        className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-2xl transition-all active:scale-95 ${
-          isListening ? 'bg-red-500 animate-pulse' : 'bg-green-600 hover:bg-green-700'
+        className={`p-5 rounded-2xl shadow-2xl transition-all duration-300 ${
+          isListening 
+            ? "bg-red-500 hover:bg-red-600 animate-pulse scale-110" 
+            : "bg-green-600 hover:bg-green-700 hover:scale-105"
         }`}
       >
-        {isListening ? <Square size={28} fill="white" /> : <Mic size={28} />}
+        {isListening ? (
+          <MicOff className="text-white" size={28} />
+        ) : (
+          <Mic className="text-white" size={28} />
+        )}
       </button>
-      <span className="mr-2 mt-2 text-[10px] font-black text-gray-400 uppercase tracking-widest bg-white px-2 py-1 rounded-md shadow-sm">
-        {isListening ? t.listening : t.micLabel}
-      </span>
     </div>
   );
 };

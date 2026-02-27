@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export const useAgroVoice = (lang, t) => {
   const [isListening, setIsListening] = useState(false);
@@ -6,19 +6,37 @@ export const useAgroVoice = (lang, t) => {
   const [aiResponse, setAiResponse] = useState('');
   const recognitionRef = useRef(null);
 
-  // --- INTERNAL KNOWLEDGE BASE FOR CROP HEALTH ---
+  // Auto-Dismiss Logic for the AI bubble
+  useEffect(() => {
+    if (aiResponse && aiResponse !== 'Listening...' && aiResponse !== 'ਸੁਣ ਰਿਹਾ ਹੈ...') {
+      const timer = setTimeout(() => {
+        setAiResponse('');
+      }, 7000); 
+      return () => clearTimeout(timer);
+    }
+  }, [aiResponse]);
+
+  // Expanded Symptom Database
   const symptomDatabase = {
     en: [
-      { keys: ['yellow', 'pale', 'nitrate'], result: "Nitrogen Deficiency", advice: "Apply Urea or nitrogen-rich fertilizer immediately." },
-      { keys: ['brown', 'spots', 'blight', 'fungus'], result: "Fungal Infection", advice: "Spray recommended fungicide and remove infected leaves." },
-      { keys: ['white', 'powder', 'mildew'], result: "Powdery Mildew", advice: "Use sulfur-based spray and ensure better air circulation." },
-      { keys: ['hole', 'insect', 'pests'], result: "Pest Attack", advice: "Identify the insect and use organic Neem oil or recommended pesticide." }
+      { keys: ['rust', 'kungi'], crop: 'wheat', variety: 'pbw824', advice: t?.knowledgeBase?.wheat?.pbw824?.rust },
+      { keys: ['rust', 'kungi'], crop: 'wheat', variety: 'unnat343', advice: t?.knowledgeBase?.wheat?.unnat343?.rust },
+      { keys: ['yellow', 'nitrogen'], advice: "Nitrogen deficiency. Apply 25kg Urea." },
+      { keys: ['whitefly'], crop: 'cotton', variety: 'rch650', advice: t?.knowledgeBase?.cotton?.rch650?.whitefly },
+      { keys: ['curl', 'curling'], crop: 'tomato', variety: 'punjab_ratta', advice: t?.knowledgeBase?.tomato?.punjab_ratta?.leaf_curl },
+      { keys: ['blight', 'black spots'], crop: 'tomato', variety: 'punjab_ratta', advice: t?.knowledgeBase?.tomato?.punjab_ratta?.blight },
+      { keys: ['brown spots', 'blight'], crop: 'potato', variety: 'kufri_pukhraj', advice: t?.knowledgeBase?.potato?.kufri_pukhraj?.blight },
+      { keys: ['scab', 'rough', 'dry'], crop: 'potato', variety: 'kufri_pukhraj', advice: t?.knowledgeBase?.potato?.kufri_pukhraj?.scab }
     ],
     pa: [
-      { keys: ['ਪੀਲੇ', 'ਪੀਲਾ', 'ਨਾਈਟ੍ਰੋਜਨ'], result: "ਨਾਈਟ੍ਰੋਜਨ ਦੀ ਕਮੀ", advice: "ਯੂਰੀਆ ਜਾਂ ਨਾਈਟ੍ਰੋਜਨ ਭਰਪੂਰ ਖਾਦ ਦੀ ਵਰਤੋਂ ਕਰੋ।" },
-      { keys: ['ਭੂਰੇ', 'ਧੱਬੇ', 'ਉੱਲੀ'], result: "ਉੱਲੀ ਦਾ ਰੋਗ", advice: "ਸਿਫਾਰਸ਼ ਕੀਤੇ ਉੱਲੀਨਾਸ਼ਕ ਦੀ ਵਰਤੋਂ ਕਰੋ ਅਤੇ ਪ੍ਰਭਾਵਿਤ ਪੱਤੇ ਹਟਾ ਦਿਓ।" },
-      { keys: ['ਚਿੱਟਾ', 'ਪਾਊਡਰ'], result: "ਚਿੱਟਾ ਰੋਗ", advice: "ਹਵਾ ਦਾ ਸੰਚਾਰ ਵਧਾਓ ਅਤੇ ਗੰਧਕ ਵਾਲੇ ਸਪਰੇਅ ਦੀ ਵਰਤੋਂ ਕਰੋ।" },
-      { keys: ['ਸੁੰਡੀ', 'ਕੀੜੇ', 'ਮੋਰੀ'], result: "ਕੀੜਿਆਂ ਦਾ ਹਮਲਾ", advice: "ਨੀਮ ਦੇ ਤੇਲ ਜਾਂ ਸਿਫਾਰਸ਼ ਕੀਤੇ ਕੀਟਨਾਸ਼ਕ ਦੀ ਵਰਤੋਂ ਕਰੋ।" }
+      { keys: ['ਕੁੰਗੀ', 'rust'], crop: 'wheat', variety: 'pbw824', advice: t?.knowledgeBase?.pa?.wheat?.pbw824?.rust },
+      { keys: ['ਕੁੰਗੀ', 'rust'], crop: 'wheat', variety: 'unnat343', advice: t?.knowledgeBase?.pa?.wheat?.unnat343?.rust },
+      { keys: ['ਪੀਲੇ', 'ਨਾਈਟ੍ਰੋਜਨ'], advice: "ਨਾਈਟ੍ਰੋਜਨ ਦੀ ਕਮੀ। ਯੂਰੀਆ ਪਾਓ।" },
+      { keys: ['ਚਿੱਟੀ ਮੱਖੀ'], crop: 'cotton', variety: 'rch650', advice: t?.knowledgeBase?.pa?.cotton?.rch650?.whitefly },
+      { keys: ['ਮਰੋੜ', 'ਪੱਤਾ ਮਰੋੜ'], crop: 'tomato', variety: 'punjab_ratta', advice: t?.knowledgeBase?.pa?.tomato?.punjab_ratta?.leaf_curl },
+      { keys: ['ਝੁਲਸ', 'ਕਾਲੇ ਧੱਬੇ'], crop: 'tomato', variety: 'punjab_ratta', advice: t?.knowledgeBase?.pa?.tomato?.punjab_ratta?.blight },
+      { keys: ['ਝੁਲਸ', 'ਭੂਰੇ ਧੱਬੇ'], crop: 'potato', variety: 'kufri_pukhraj', advice: t?.knowledgeBase?.pa?.potato?.kufri_pukhraj?.blight },
+      { keys: ['ਦਾਗ', 'ਸੁੱਕਾ'], crop: 'potato', variety: 'kufri_pukhraj', advice: t?.knowledgeBase?.pa?.potato?.kufri_pukhraj?.scab }
     ]
   };
 
@@ -26,46 +44,24 @@ export const useAgroVoice = (lang, t) => {
     const lowerText = text.toLowerCase();
     let finalReply = "";
 
-    // 1. MANDI PRICE LOGIC
-    if (lowerText.includes('price') || lowerText.includes('rate') || lowerText.includes('ਭਾਅ') || lowerText.includes('ਕਣਕ')) {
-      try {
+    try {
+      if (lowerText.includes('price') || lowerText.includes('rate') || lowerText.includes('ਭਾਅ')) {
         const response = await fetch('http://localhost:5000/api/prices');
         const data = await response.json();
-        if (data && data.length > 0) {
-          const item = data[0]; // Gets the first Punjab Mandi record
-          finalReply = lang === 'pa' 
-            ? `${item.market} ਵਿੱਚ ${item.crop} ਦਾ ਭਾਅ ${item.price.replace('₹', '')} ਰੁਪਏ ਹੈ।` 
-            : `The current rate for ${item.crop} at ${item.market} is ${item.price.replace('₹', '')} rupees.`;
+        const match = data?.find(item => lowerText.includes(item.crop.toLowerCase()));
+
+        if (match) {
+          finalReply = lang === 'pa' ? `${match.market} ਵਿੱਚ ਭਾਅ ${match.price} ਹੈ।` : `Price at ${match.market} is ${match.price}.`;
+        } else {
+          finalReply = lang === 'pa' ? "ਭਾਅ ਨਹੀਂ ਮਿਲੇ।" : "No rates found.";
         }
-      } catch (err) {
-        finalReply = lang === 'pa' ? "ਸਰਵਰ ਨਾਲ ਕੁਨੈਕਸ਼ਨ ਨਹੀਂ ਹੋ ਸਕਿਆ।" : "Could not connect to the price database.";
-      }
-    } 
-    
-    // 2. PLANT HEALTH / DISEASE LOGIC (NEW)
-    else if (
-      lowerText.includes('leaf') || lowerText.includes('pattay') || lowerText.includes('ਬੂਟਾ') || 
-      lowerText.includes('disease') || lowerText.includes('ਬਿਮਾਰੀ') || lowerText.includes('ਹਾਲਤ')
-    ) {
-      const currentDB = symptomDatabase[lang === 'pa' ? 'pa' : 'en'];
-      const match = currentDB.find(item => item.keys.some(key => lowerText.includes(key)));
-
-      if (match) {
-        finalReply = lang === 'pa' 
-          ? `ਇਹ ${match.result} ਲੱਛਣ ਹਨ। ਸੁਝਾਅ: ${match.advice}` 
-          : `This sounds like ${match.result}. Recommended action: ${match.advice}`;
       } else {
-        finalReply = lang === 'pa' 
-          ? "ਮੈਨੂੰ ਲੱਛਣਾਂ ਬਾਰੇ ਹੋਰ ਦੱਸੋ, ਜਿਵੇਂ ਪੱਤਿਆਂ ਦਾ ਰੰਗ ਜਾਂ ਧੱਬੇ।" 
-          : "Please tell me more about the symptoms, such as leaf color or spots.";
+        const currentDB = symptomDatabase[lang === 'pa' ? 'pa' : 'en'];
+        const match = currentDB.find(item => item.keys.some(key => lowerText.includes(key)));
+        finalReply = match?.advice || (lang === 'pa' ? "ਹੋਰ ਦੱਸੋ।" : "Tell me more.");
       }
-    } 
-
-    // 3. FALLBACK
-    else {
-      finalReply = lang === 'pa' 
-        ? `ਮੈਂ ਸੁਣਿਆ: "${text}"। ਤੁਸੀਂ ਮੈਨੂੰ ਫਸਲਾਂ ਦੇ ਭਾਅ ਜਾਂ ਬਿਮਾਰੀਆਂ ਬਾਰੇ ਪੁੱਛ ਸਕਦੇ ਹੋ।` 
-        : `I heard: "${text}". Try asking about Mandi prices or crop diseases.`;
+    } catch (err) {
+      finalReply = "Error connecting to service.";
     }
 
     setAiResponse(finalReply);
@@ -73,11 +69,10 @@ export const useAgroVoice = (lang, t) => {
   };
 
   const speak = (text) => {
-    if ('speechSynthesis' in window) {
+    if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = lang === 'pa' ? 'pa-IN' : 'en-IN';
-      utterance.rate = 1.0;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -85,33 +80,24 @@ export const useAgroVoice = (lang, t) => {
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
-
     const recognition = new SpeechRecognition();
     recognition.lang = lang === 'pa' ? 'pa-IN' : 'en-IN';
-    recognition.continuous = false;
-    recognition.interimResults = false;
     recognitionRef.current = recognition;
 
     recognition.onstart = () => {
       setIsListening(true);
       setAiResponse(lang === 'pa' ? 'ਸੁਣ ਰਿਹਾ ਹੈ...' : 'Listening...');
     };
-
     recognition.onresult = (event) => {
       const resultText = event.results[0][0].transcript;
       setTranscript(resultText);
       processWithAI(resultText);
     };
-
     recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => setIsListening(false);
-    
     recognition.start();
   };
 
-  const stopListening = () => {
-    if (recognitionRef.current) recognitionRef.current.stop();
-  };
+  const stopListening = () => recognitionRef.current?.stop();
 
   return { isListening, transcript, aiResponse, startListening, stopListening };
 };
