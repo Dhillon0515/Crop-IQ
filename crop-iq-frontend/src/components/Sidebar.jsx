@@ -13,9 +13,14 @@ const Sidebar = ({ lang, activePage, setActivePage }) => {
       
       {/* Project Logo/Branding */}
       <div className="p-8">
-        <h1 className="text-3xl font-black text-green-700 tracking-tighter">
+        <img
+         src="/CropIQ_logo.jpeg"
+         alt="Crop IQ Logo"
+         className="h-12 w-auto"
+         />
+        {/* <h1 className="text-3xl font-black text-green-700 tracking-tighter">
           Crop IQ <span className="text-green-400">.</span>
-        </h1>
+        </h1> */}
         <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">
           GNDEC Project
         </p>
