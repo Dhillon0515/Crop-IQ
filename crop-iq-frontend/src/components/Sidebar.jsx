@@ -1,27 +1,28 @@
 import React from 'react';
-import { Home, Leaf } from 'lucide-react';
+import { Home, Leaf, Sprout } from 'lucide-react';
 
 const Sidebar = ({ lang, activePage, setActivePage }) => {
-  // Cleaned up navigation items (Removed Weather & Mandi)
   const navItems = [
     { id: 'home', icon: Home, labelEn: 'Dashboard', labelPa: 'ਡੈਸ਼ਬੋਰਡ' },
     { id: 'doctor', icon: Leaf, labelEn: 'Plant Doctor', labelPa: 'ਫ਼ਸਲ ਡਾਕਟਰ' },
   ];
 
   return (
-    <aside className="w-64 bg-white shadow-2xl h-screen fixed top-0 left-0 border-r border-green-50 flex flex-col z-40">
+    /* Added border-black/10 for light mode and border-white/10 for dark mode + shadow-2xl */
+    <aside className="w-64 bg-[var(--bg-body)] h-screen fixed top-0 left-0 border-r border-black/10 dark:border-white/10 flex flex-col z-40 transition-colors duration-300 shadow-2xl">
       
       {/* Project Logo/Branding */}
       <div className="p-8">
-        <img
-         src="/CropIQ_logo.jpeg"
-         alt="Crop IQ Logo"
-         className="h-12 w-auto"
-         />
-        {/* <h1 className="text-3xl font-black text-green-700 tracking-tighter">
-          Crop IQ <span className="text-green-400">.</span>
-        </h1> */}
-        <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-widest">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="bg-[var(--nav-green)] p-1.5 rounded-lg shadow-[0_0_15px_rgba(57,255,20,0.3)]">
+             <Sprout size={20} className="text-black" />
+          </div>
+          <h1 className="text-2xl font-black text-[var(--text-main)] tracking-tighter">
+            Crop<span className="text-[var(--nav-green)]">IQ</span>
+          </h1>
+        </div>
+        
+        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em]">
           GNDEC Project
         </p>
       </div>
@@ -38,11 +39,11 @@ const Sidebar = ({ lang, activePage, setActivePage }) => {
               onClick={() => setActivePage(item.id)}
               className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black transition-all duration-300 ${
                 isActive 
-                  ? 'bg-green-600 text-white shadow-xl shadow-green-100 translate-x-1' 
-                  : 'text-gray-400 hover:bg-green-50 hover:text-green-700'
+                  ? 'bg-[var(--nav-green)] text-black shadow-[0_10px_25px_rgba(57,255,20,0.3)] scale-[1.02]' 
+                  : 'text-[var(--text-muted)] hover:bg-black/5 dark:hover:bg-white/5 hover:text-[var(--text-main)]'
               }`}
             >
-              <Icon size={22} className={isActive ? 'animate-bounce' : ''} />
+              <Icon size={22} className={isActive ? 'animate-pulse' : 'text-[var(--nav-green)]'} />
               <span className="text-lg">
                 {lang === 'en' ? item.labelEn : item.labelPa}
               </span>
@@ -50,6 +51,13 @@ const Sidebar = ({ lang, activePage, setActivePage }) => {
           );
         })}
       </nav>
+
+      {/* Footer */}
+      <div className="p-6 border-t border-black/5 dark:border-white/10">
+        <p className="text-[9px] font-bold text-[var(--text-muted)] opacity-50 uppercase text-center tracking-widest">
+          v2.0 Modern Agritech
+        </p>
+      </div>
     </aside>
   );
 };

@@ -5,19 +5,24 @@ import Sidebar from './Sidebar';
 
 const MainLayout = () => {
   return (
-    // Notice we removed "max-w-md mx-auto" so it can stretch to full screen
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row font-sans overflow-hidden selection:bg-green-200">
+    /* Change 1: bg-[var(--bg-main)] ensures the whole screen background 
+       switches from Light Gray to Deep Navy. 
+       Change 2: Added transition-colors for a smooth fade effect.
+    */
+    <div className="min-h-screen bg-[var(--bg-main)] flex flex-col md:flex-row font-sans overflow-hidden selection:bg-green-200 transition-colors duration-300">
       
       {/* Desktop Navigation */}
       <Sidebar />
       
       {/* Main Content Area */}
-      {/* md:pb-0 removes the extra padding at the bottom on desktop since there's no bottom nav */}
-      <div className="flex-1 h-screen overflow-y-auto pb-20 md:pb-0">
+      {/* Change 3: Added 'text-[var(--text-main)]' so any loose text inside 
+         the layout (like loading spinners or footers) inherits the right color.
+      */ }
+      <div className="flex-1 h-screen overflow-y-auto pb-20 md:pb-0 text-[var(--text-main)]">
         <Outlet /> 
       </div>
       
-      {/* Mobile Bottom Navigation - Added md:hidden so it disappears on desktop */}
+      {/* Mobile Bottom Navigation */}
       <div className="md:hidden">
         <BottomNavigation />
       </div>
