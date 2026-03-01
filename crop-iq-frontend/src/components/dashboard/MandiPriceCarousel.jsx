@@ -30,7 +30,8 @@ const MandiPriceCarousel = ({ lang, t }) => {
     if (name.includes('cucumbar') || name.includes('kheera')) return t.crops.cucumber;
     if (name.includes('pea')) return t.crops.peas;
     if (name.includes('chilli')) return t.crops.chilli;
-    
+    if (name.includes('onion')) return t.crops.onion;
+    if (name.includes('papaya')) return t.crops.papaya;
     return cropName; 
   };
 
@@ -46,7 +47,7 @@ const MandiPriceCarousel = ({ lang, t }) => {
               <h4 className="font-bold text-gray-900 text-lg uppercase">{translateCrop(item.crop)}</h4>
               <div className="flex items-center text-xs text-gray-400 mt-1"><MapPin size={12} className="mr-1" /> {item.market}</div>
               <div className="mt-4 flex items-end justify-between">
-                <span className="text-2xl font-black text-gray-900">₹{item.price}/q</span>
+                <span className="text-2xl font-black text-gray-900">{item.price}</span>
                 <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-md">LIVE</span>
               </div>
             </div>

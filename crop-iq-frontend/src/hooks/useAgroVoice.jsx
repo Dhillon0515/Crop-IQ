@@ -69,13 +69,48 @@ export const useAgroVoice = (lang, t) => {
   };
 
   const speak = (text) => {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang === 'pa' ? 'pa-IN' : 'en-IN';
-      window.speechSynthesis.speak(utterance);
-    }
-  };
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    
+    // 1. Set the language tag
+    utterance.lang = lang === 'pa' ? 'pa-IN' : 'en-IN';
+    
+    // 2. Fetch all available voices on this computer
+    const voices = window.speechSynthesis.getVoices();
+    
+    // 3. Force the browser to pick the correct voice profile
+    if (lang === 'pa') {
+      // Hunt specifically for a Punjabi voice
+      const punjabiVoice = voices.find(v => 
+        v.lang === 'pa-IN' || 
+        v.lang === 'pa_IN' || 
+        v.name.includes('Punjabi')
+      );
+      
+      if (punjabiVoice) {
+        utterance.voice = punjabiVoice;
+        console.log("Found Punjabi Voice:", punjabiVoice.name);
+      } else {
+        console.warn("WARNING: No Punjabi voice found on this device!");
+      }
+     } else {
+      // Hunt for a good Indian English voice
+      const englishVoice = voices.find(v => v.lang === 'en-IN');
+      if (englishVoice) utterance.voice = englishVoice;
+     }
+
+     utterance.rate = 0.9; // Slightly slower for better clarity
+     window.speechSynthesis.speak(utterance);
+    };
+
+  // --- VERY IMPORTANT FIX ---
+  // Browsers load voices asynchronously. This forces them to load immediately 
+  // when your component mounts, so they are ready when you click the button.
+     if (window.speechSynthesis.onvoiceschanged !== undefined) {
+     window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+     }
 
   const startListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -95,6 +130,17 @@ export const useAgroVoice = (lang, t) => {
     };
     recognition.onend = () => setIsListening(false);
     recognition.start();
+    recognition.onerror = (event) => {
+    console.error("MIC ERROR FIRED! The exact reason is: ", event.error);
+  
+     if (event.error === 'not-allowed') {
+     alert("Microphone access was denied by the browser or OS!");
+     } else if (event.error === 'no-speech') {
+     console.log("Mic is on, but the browser isn't detecting any sound. Check your hardware mic.");
+     }  else if (event.error === 'network') {
+     console.log("Browser doesn't have the cloud translation connection right now.");
+    }
+   };
   };
 
   const stopListening = () => recognitionRef.current?.stop();
