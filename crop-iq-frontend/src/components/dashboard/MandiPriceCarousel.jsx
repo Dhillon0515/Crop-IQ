@@ -28,6 +28,11 @@ const MandiPriceCarousel = ({ lang, t }) => {
     if (name.includes('cucumbar') || name.includes('kheera')) return t.crops.cucumber;
     if (name.includes('pea')) return t.crops.peas;
     if (name.includes('chilli')) return t.crops.chilli;
+<<<<<<< HEAD
+=======
+    if (name.includes('onion')) return t.crops.onion;
+    if (name.includes('papaya')) return t.crops.papaya;
+>>>>>>> main
     return cropName; 
   };
 
@@ -42,6 +47,7 @@ const MandiPriceCarousel = ({ lang, t }) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {prices.map((item) => (
+<<<<<<< HEAD
             <div 
               key={item.id} 
               className="bg-[var(--bg-card)] p-6 rounded-[32px] shadow-lg border border-white/10 hover:border-[var(--nav-green)]/50 transition-all"
@@ -63,6 +69,14 @@ const MandiPriceCarousel = ({ lang, t }) => {
                 <span className="text-[10px] font-black text-[var(--nav-green)] bg-[var(--nav-green)]/10 px-2 py-1 rounded-md border border-[var(--nav-green)]/30">
                  LIVE
                 </span>
+=======
+            <div key={item.id} className="bg-white p-5 rounded-3xl shadow-sm border-l-4 border-green-500 hover:shadow-lg transition-all">
+              <h4 className="font-bold text-gray-900 text-lg uppercase">{translateCrop(item.crop)}</h4>
+              <div className="flex items-center text-xs text-gray-400 mt-1"><MapPin size={12} className="mr-1" /> {item.market}</div>
+              <div className="mt-4 flex items-end justify-between">
+                <span className="text-2xl font-black text-gray-900">{item.price}</span>
+                <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-1 rounded-md">LIVE</span>
+>>>>>>> main
               </div>
             </div>
           ))}
