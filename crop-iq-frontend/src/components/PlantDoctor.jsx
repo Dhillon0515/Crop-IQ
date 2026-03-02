@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Leaf, Volume2, ShieldCheck } from 'lucide-react';
+import { Leaf, Volume2, ShieldCheck, RotateCcw } from 'lucide-react';
 
 const PlantDoctor = ({ lang, t, voiceTranscript }) => {
   const [selection, setSelection] = useState({ crop: 'wheat', variety: 'pbw824' });
@@ -21,13 +21,18 @@ const PlantDoctor = ({ lang, t, voiceTranscript }) => {
     window.speechSynthesis.speak(utterance);
   };
 
+  const clearDiagnosis = () => {
+    setSymptom('');
+    setReport(null);
+    window.speechSynthesis.cancel();
+  };
+
   const handleGetSolution = () => {
     const text = symptom.toLowerCase();
     const cropData = t?.knowledgeBase?.[selection.crop]?.[selection.variety];
-    
     let diagnosis = null;
     
-    // Expanded Matching Logic for both original crops and new vegetables
+    // Diagnosis Logic
     if (text.includes('rust') || text.includes('ਕੁੰਗੀ')) diagnosis = cropData?.rust;
     else if (text.includes('nitrogen') || text.includes('ਪੀਲੇ')) diagnosis = cropData?.nitrogen;
     else if (text.includes('whitefly') || text.includes('ਮੱਖੀ')) diagnosis = cropData?.whitefly;
@@ -41,68 +46,122 @@ const PlantDoctor = ({ lang, t, voiceTranscript }) => {
   };
 
   return (
-    <div className="p-6 md:p-10 max-w-4xl mx-auto">
-      <div className="bg-white rounded-[40px] shadow-2xl p-8 border border-gray-100">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="bg-green-100 p-3 rounded-2xl">
-            <Leaf className="text-green-600" size={28}/>
+    <div className="p-6 md:p-10 max-w-4xl mx-auto animate-in fade-in duration-700">
+      {/* Main Card Container */}
+      <div className="bg-[var(--bg-card)] rounded-[40px] shadow-2xl p-8 border border-black/5 dark:border-white/10 transition-colors duration-300">
+        
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-10">
+          <div className="flex items-center gap-5">
+            <div className="bg-[var(--nav-green)]/20 p-4 rounded-2xl shadow-inner border border-[var(--nav-green)]/10">
+              <Leaf className="text-[var(--nav-green)]" size={32}/>
+            </div>
+            <div>
+              <h2 className="text-3xl font-black text-[var(--text-main)] tracking-tight">
+                {t?.doctorTitle}
+              </h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--nav-green)] animate-pulse" />
+                <p className="text-[var(--text-muted)] text-[10px] font-black uppercase tracking-widest">
+                  GNDEC AI Diagnosis
+                </p>
+              </div>
+            </div>
           </div>
-          <h2 className="text-3xl font-black text-gray-800 tracking-tight">{t?.doctorTitle}</h2>
+          
+          {/* Enhanced Reset Button */}
+          <button 
+            onClick={clearDiagnosis}
+            className="group flex items-center gap-2 p-3 px-5 rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all text-[10px] font-black uppercase tracking-wider border border-transparent hover:border-red-500/20"
+          >
+            <RotateCcw size={14} className="group-hover:-rotate-180 transition-transform duration-500" /> 
+            {lang === 'en' ? 'Reset' : 'ਰੀਸੈੱਟ'}
+          </button>
         </div>
         
-        {/* Updated Dropdowns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <select 
-            className="p-4 bg-gray-50 rounded-2xl font-bold border-2 border-transparent focus:border-green-200 outline-none transition-all"
-            value={selection.crop}
-            onChange={(e) => setSelection({...selection, crop: e.target.value})}
-          >
-            <option value="wheat">{t?.cropsList?.wheat}</option>
-            <option value="cotton">{t?.cropsList?.cotton}</option>
-            <option value="tomato">{t?.cropsList?.tomato}</option>
-            <option value="potato">{t?.cropsList?.potato}</option>
-          </select>
+        {/* Dropdowns Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="space-y-3">
+            <label className="text-[var(--text-muted)] text-[11px] font-black uppercase ml-2 tracking-widest opacity-80">Select Crop</label>
+            <div className="relative group">
+                <select 
+                  className="w-full p-4 bg-[var(--bg-body)] text-[var(--text-main)] rounded-2xl font-bold border border-black/5 dark:border-white/10 focus:border-[var(--nav-green)]/50 outline-none transition-all cursor-pointer appearance-none shadow-inner"
+                  value={selection.crop}
+                  onChange={(e) => setSelection({...selection, crop: e.target.value})}
+                >
+                  <option value="wheat">{t?.cropsList?.wheat}</option>
+                  <option value="cotton">{t?.cropsList?.cotton}</option>
+                  <option value="tomato">{t?.cropsList?.tomato}</option>
+                  <option value="potato">{t?.cropsList?.potato}</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] opacity-30">
+                    ▼
+                </div>
+            </div>
+          </div>
 
-          <select 
-            className="p-4 bg-gray-50 rounded-2xl font-bold border-2 border-transparent focus:border-green-200 outline-none transition-all"
-            value={selection.variety}
-            onChange={(e) => setSelection({...selection, variety: e.target.value})}
-          >
-            {selection.crop === 'wheat' && (
-              <><option value="pbw824">PBW 824</option><option value="unnat343">Unnat 343</option></>
-            )}
-            {selection.crop === 'cotton' && <option value="rch650">RCH 650</option>}
-            {selection.crop === 'tomato' && <option value="punjab_ratta">Punjab Ratta</option>}
-            {selection.crop === 'potato' && <option value="kufri_pukhraj">Kufri Pukhraj</option>}
-          </select>
+          <div className="space-y-3">
+            <label className="text-[var(--text-muted)] text-[11px] font-black uppercase ml-2 tracking-widest opacity-80">Variety</label>
+            <div className="relative group">
+                <select 
+                  className="w-full p-4 bg-[var(--bg-body)] text-[var(--text-main)] rounded-2xl font-bold border border-black/5 dark:border-white/10 focus:border-[var(--nav-green)]/50 outline-none transition-all cursor-pointer appearance-none shadow-inner"
+                  value={selection.variety}
+                  onChange={(e) => setSelection({...selection, variety: e.target.value})}
+                >
+                  {selection.crop === 'wheat' && (
+                    <><option value="pbw824">PBW 824</option><option value="unnat343">Unnat 343</option></>
+                  )}
+                  {selection.crop === 'cotton' && <option value="rch650">RCH 650</option>}
+                  {selection.crop === 'tomato' && <option value="punjab_ratta">Punjab Ratta</option>}
+                  {selection.crop === 'potato' && <option value="kufri_pukhraj">Kufri Pukhraj</option>}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] opacity-30">
+                    ▼
+                </div>
+            </div>
+          </div>
         </div>
 
-        <textarea 
-          className="w-full p-6 bg-gray-50 rounded-3xl font-bold text-lg min-h-[150px] mb-6 outline-none border-2 border-transparent focus:border-green-200 transition-all placeholder:text-gray-300"
-          placeholder={lang === 'en' ? "Describe symptoms..." : "ਲੱਛਣ ਦੱਸੋ..."} 
-          value={symptom} 
-          onChange={(e) => setSymptom(e.target.value)}
-        />
+        {/* Symptoms Text Area */}
+        <div className="space-y-3 mb-8">
+          <label className="text-[var(--text-muted)] text-[11px] font-black uppercase ml-2 tracking-widest opacity-80">Observations</label>
+          <textarea 
+            className="w-full p-6 bg-[var(--bg-body)] text-[var(--text-main)] rounded-[32px] font-bold text-lg min-h-[180px] outline-none border border-black/5 dark:border-white/10 focus:border-[var(--nav-green)]/50 transition-all placeholder:text-[var(--text-muted)] placeholder:opacity-20 shadow-inner resize-none"
+            placeholder={lang === 'en' ? "Describe yellowing, spots, or pests..." : "ਪੀਲੇ ਪੱਤੇ, ਧੱਬੇ ਜਾਂ ਕੀੜੇ..."} 
+            value={symptom} 
+            onChange={(e) => setSymptom(e.target.value)}
+          />
+        </div>
 
+        {/* Action Button */}
         <button 
           onClick={handleGetSolution}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center justify-center gap-3"
+          className="w-full bg-[var(--nav-green)] hover:brightness-110 text-black py-5 rounded-3xl font-black text-xl shadow-[0_15px_40px_rgba(57,255,20,0.25)] transition-all active:scale-[0.98] flex items-center justify-center gap-3 group"
         >
-          <Volume2 size={24}/> {lang === 'en' ? "GET ACCURATE SOLUTION" : "ਸਹੀ ਇਲਾਜ ਜਾਣੋ"}
+          <Volume2 size={26} className="group-hover:scale-110 transition-transform"/> 
+          {lang === 'en' ? "GET ACCURATE SOLUTION" : "ਸਹੀ ਇਲਾਜ ਜਾਣੋ"}
         </button>
 
+        {/* Solution Card */}
         {report && (
-          <div className="mt-10 p-8 rounded-[32px] bg-green-50 border-l-[12px] border-green-500 shadow-sm animate-in fade-in slide-in-from-bottom-5 duration-500">
-            <div className="flex items-center gap-2 mb-3">
-              <ShieldCheck className="text-green-600" size={20}/>
-              <h3 className="text-xs font-black text-green-600 uppercase tracking-widest">{t?.treatment}</h3>
+          <div className="mt-10 p-8 rounded-[35px] bg-[var(--nav-green)]/[0.03] border-l-[12px] border-[var(--nav-green)] shadow-2xl animate-in slide-in-from-bottom-5 duration-500">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="p-2 bg-[var(--nav-green)] rounded-lg">
+                <ShieldCheck className="text-black" size={20}/>
+              </div>
+              <h3 className="text-xs font-black text-[var(--nav-green)] uppercase tracking-[0.3em]">{t?.treatment}</h3>
             </div>
-            <p className="text-2xl font-bold text-gray-800 leading-snug">
+            <p className="text-2xl font-black text-[var(--text-main)] leading-relaxed">
               {report}
             </p>
           </div>
         )}
       </div>
+      
+      {/* Disclaimer */}
+      <p className="text-center mt-8 text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-widest opacity-30">
+         AI insights are for guidance. Consult experts for severe crop damage.
+      </p>
     </div>
   );
 };
